@@ -3,7 +3,7 @@ services:
     name: madrasti-api
     runtime: node
     plan: free
-    buildCommand: npm ci --ignore-scripts && npm test
+    buildCommand: npm ci --include=dev --ignore-scripts && npm test
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -15,4 +15,3 @@ services:
         sync: false
       - key: APP_SECRET
         generateValue: true
-
