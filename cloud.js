@@ -1,5 +1,33 @@
 
 const cloud = { token: '', account: null, revision: 0, pending: [], sending: false, failed: null, baseline: '', generation: 0 };
+const sessionStorageKey = 'madrasti-session';
+function rememberSession(token) {
+  try { localStorage.setItem(sessionStorageKey, token); }
+  catch { toast('تعذر حفظ الدخول على هذا الجهاز'); }
+}
+async function restoreSession() {
+  let token;
+  try { token = localStorage.getItem(sessionStorageKey); } catch { return; }
+  if (!token) return;
+  const generation = cloud.generation;
+  $('#root').innerHTML = '<div class="login"><div class="card"><p role="status">جارٍ استعادة تسجيل الدخول…</p></div></div>';
+  try {
+    const result = await api('/state', 'GET', null, token);
+    if (generation !== cloud.generation) return;
+    cloud.token = token;
+    installSchool(result);
+    render();
+  } catch (error) {
+    if (generation !== cloud.generation) return;
+    if (error.status === 401) {
+      try { localStorage.removeItem(sessionStorageKey); } catch {}
+      render();
+      toast('يرجى تسجيل الدخول مجدداً');
+    } else {
+      $('#root').innerHTML = '<div class="login"><div class="card"><p role="alert">تعذر الاتصال بالخادم لاستعادة تسجيل الدخول.</p><button class="btn" onclick="restoreSession()">إعادة المحاولة</button><button class="btn outline" onclick="signOut(true)">تسجيل الدخول بحساب آخر</button></div></div>';
+    }
+  }
+}
 const dataFields = ['school','schoolType','year','students','teachers','classes','subjects','attendance','grades','schedule','homework','announcements','teacherNotifications'];
 function emptySchool() {
   return { logged: false, theme: 'light', students: [], teachers: [], schools: [] };
@@ -147,6 +175,7 @@ async function signOut(force = false) {
   const unsaved = cloud.pending.length || (cloud.token && snapshotVersion(schoolSnapshot()) !== cloud.baseline);
   if (!force && unsaved && !confirm('هناك تعديلات لم تُحفظ. تسجيل الخروج؟')) return;
   const token = cloud.token;
+  try { localStorage.removeItem(sessionStorageKey); } catch {}
   Object.assign(cloud, { token: '', account: null, revision: 0, pending: [], sending: false, failed: null, baseline: '', generation: cloud.generation + 1 });
   db = emptySchool();
   lastNotified = '';

@@ -23,6 +23,8 @@ test('school accounts, teacher permissions, synchronization and credential revoc
     const school = await call('register', { name: 'مدير المدرسة الأول', school: 'مدرسة أ', pin: '12457896' });
     const other = await call('register', { name: 'مدير المدرسة الثاني', school: 'مدرسة ب', pin: '14859632' });
     assert.equal(school.status, 200);
+    const sessionRows = await database.query("SELECT expires::text FROM madrasti_sessions WHERE school_code=$1", [school.account.schoolCode]);
+    assert.equal(sessionRows.rows[0].expires, 'infinity');
     assert.equal(other.status, 200);
     assert.notEqual(school.account.schoolCode, other.account.schoolCode);
     assert.equal((await call('state')).status, 401);
@@ -59,6 +61,8 @@ test('school accounts, teacher permissions, synchronization and credential revoc
     assert.equal(current.data.students.length, 2);
     assert.equal((await call('state', { data: current.data, revision: current.revision, credential: { id: 't1', pin: '6543' } }, school.token, 'PUT')).status, 200);
     assert.equal((await call('state', null, teacher.token)).status, 401);
+    assert.equal((await call('logout', {}, school.token)).status, 200);
+    assert.equal((await call('state', null, school.token)).status, 401);
   } finally {
     await new Promise(resolve => platform.close(resolve));
     await database.close();

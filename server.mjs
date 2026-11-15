@@ -220,7 +220,7 @@ export async function createPlatform(db, { secret, origin, proxy = false } = {})
   };
   async function session(row, id) {
     const token = randomBytes(32).toString('base64url');
-    await db.query(`INSERT INTO madrasti_sessions VALUES ($1,$2,$3,$4,now() + interval '12 hours')`,
+    await db.query(`INSERT INTO madrasti_sessions VALUES ($1,$2,$3,$4,'infinity'::timestamptz)`,
       [digest(token), row.code, id, accountVersion(row, id)]);
     return { token, ...view(row, id) };
   }
