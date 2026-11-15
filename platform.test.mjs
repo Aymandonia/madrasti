@@ -34,10 +34,10 @@ test('school accounts, teacher permissions, synchronization and credential revoc
     data.teachers = [{ id: 't1', name: 'مدرس جديد', phone: '9647701234567',
       assignments: [{ id: 'a1', group: 'أ', subject: 'رياضيات', weekly: 2 }], leaves: [] }];
     data.announcements.push({ id: 'n1', title: 'إعلان', detail: 'للمدرسين' });
-    assert.equal((await call('state', { data, revision: school.revision, credential: { id: 't1', pin: '13579246' } }, school.token, 'PUT')).status, 200);
+    assert.equal((await call('state', { data, revision: school.revision, credential: { id: 't1', pin: '1357' } }, school.token, 'PUT')).status, 200);
     assert.deepEqual((await call('state', null, other.token)).data.students, []);
-    const login = { schoolCode: school.account.schoolCode, name: 'مدرس جديد', pin: '13579246' };
-    assert.equal((await call('login', { ...login, schoolCode: other.account.schoolCode })).status, 401);
+    const login = { school: 'مدرسة أ', name: 'مدرس جديد', pin: '1357' };
+    assert.equal((await call('login', { ...login, school: 'مدرسة ب' })).status, 401);
     const teacher = await call('login', login);
     assert.equal(teacher.status, 200);
     assert.deepEqual(teacher.data.students.map(s => s.id), ['s1']);
@@ -57,7 +57,7 @@ test('school accounts, teacher permissions, synchronization and credential revoc
     assert.equal(current.data.grades['رياضيات|s1'], 85);
     assert.equal(current.data.teacherNotifications[0].teacher, 'مدرس جديد');
     assert.equal(current.data.students.length, 2);
-    assert.equal((await call('state', { data: current.data, revision: current.revision, credential: { id: 't1', pin: '65432198' } }, school.token, 'PUT')).status, 200);
+    assert.equal((await call('state', { data: current.data, revision: current.revision, credential: { id: 't1', pin: '6543' } }, school.token, 'PUT')).status, 200);
     assert.equal((await call('state', null, teacher.token)).status, 401);
   } finally {
     await new Promise(resolve => platform.close(resolve));
