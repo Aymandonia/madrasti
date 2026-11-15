@@ -17,6 +17,12 @@ const line = (value, max = 120) => {
   requireThat(typeof value === 'string' && value.trim() && value.trim().length <= max);
   return value.trim().replace(/\s+/gu, ' ').normalize('NFC');
 };
+const schoolNameMarks = '[\u061c\u0640\u064b-\u065f\u0670\u200b-\u200f\u202a-\u202e\u2066-\u2069]';
+const schoolNameMarksPattern = new RegExp(schoolNameMarks, 'gu');
+const schoolNameAlefs = 'أإآٱ';
+const schoolNameAlefsPattern = new RegExp('[' + schoolNameAlefs + ']', 'gu');
+const schoolLoginKey = name => name.replace(schoolNameMarksPattern, '')
+  .replace(schoolNameAlefsPattern, 'ا').trim().replace(/\s+/gu, ' ');
 const pinOk = value => typeof value === 'string' && /^[0-9]{8}$/.test(value);
 const teacherPinOk = value => typeof value === 'string' && /^[0-9]{4}$/.test(value);
 const lists = ['teachers', 'classes', 'subjects', 'students', 'schedule', 'homework', 'announcements', 'teacherNotifications'];
@@ -290,9 +296,16 @@ export async function createPlatform(db, { secret, origin, proxy = false } = {})
         await limit('login-ip:' + ip, 30);
         const input = await body(req);
         const school = line(input.school), name = line(input.name);
+        const schoolKey = schoolLoginKey(school);
+        requireThat(schoolKey);
         requireThat(pinOk(input.pin) || teacherPinOk(input.pin));
-        await limit('login-account:' + school + ':' + name, 8);
-        const { rows } = await db.query("SELECT * FROM madrasti_schools WHERE data->>'school'=$1", [school]);
+        await limit('login-account:' + schoolKey + ':' + name, 8);
+        const exact = await db.query("SELECT * FROM madrasti_schools WHERE data->>'school'=$1", [school]);
+        const rows = exact.rows.length ? exact.rows : (await db.query(`
+          SELECT * FROM madrasti_schools
+          WHERE btrim(regexp_replace(translate(regexp_replace(data->>'school', $2, '', 'g'), $3, $4),
+            '[[:space:]]+', ' ', 'g'))=$1`,
+          [schoolKey, schoolNameMarks, schoolNameAlefs, 'ا'.repeat(schoolNameAlefs.length)])).rows;
         const candidates = rows.flatMap(row => {
           const teacher = row.data.teachers.find(t => t.name === name && !t.disabled);
           const id = row.manager === name ? 'manager' : teacher?.id;
@@ -305,7 +318,8 @@ export async function createPlatform(db, { secret, origin, proxy = false } = {})
           const actual = await hash(input.pin, candidate.stored.split(':')[0]);
           if (candidate.id && timingSafeEqual(Buffer.from(candidate.stored), Buffer.from(actual))) matches.push(candidate);
         }
-        requireThat(matches.length === 1, 401, 'اسم المدرسة أو الاسم أو الرمز غير صحيح، أو الحساب غير محدد');
+        requireThat(matches.length < 2, 401, 'تطابقت البيانات مع أكثر من مدرسة. تواصل مع مسؤول المنصة لتحديد الحساب.');
+        requireThat(matches.length === 1, 401, 'تحقق من اسم المدرسة واسم الحساب والرمز السري.');
         return send(200, await session(matches[0].row, matches[0].id));
       }
       requireThat(['/api/state', '/api/logout'].includes(path), 404, 'الصفحة غير موجودة');

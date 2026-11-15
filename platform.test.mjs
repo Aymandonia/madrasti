@@ -63,6 +63,44 @@ test('school accounts, teacher permissions, synchronization and credential revoc
     assert.equal((await call('state', null, teacher.token)).status, 401);
     assert.equal((await call('logout', {}, school.token)).status, 200);
     assert.equal((await call('state', null, school.token)).status, 401);
+
+    const managerLogin = { school: 'مدرسة أ', name: 'مدير المدرسة الأول', pin: '12457896' };
+    const manager = await call('login', managerLogin);
+    assert.equal(manager.status, 200);
+    assert.equal(manager.account.schoolCode, school.account.schoolCode);
+
+    const copiedSchoolName = '\u200fمدرســة ا\u200e';
+    const copiedManager = await call('login', { ...managerLogin, school: copiedSchoolName });
+    assert.equal(copiedManager.status, 200, 'School name with Arabic formatting still identifies the same school');
+    assert.equal(copiedManager.account.schoolCode, school.account.schoolCode);
+    assert.equal(copiedManager.data.grades['رياضيات|s1'], 85);
+
+    const updatedTeacherLogin = { ...login, pin: '6543' };
+    const teacherSession = await call('login', updatedTeacherLogin);
+    assert.equal(teacherSession.status, 200);
+    assert.equal((await call('logout', {}, teacherSession.token)).status, 200);
+    const teacherAgain = await call('login', { ...updatedTeacherLogin, school: copiedSchoolName });
+    assert.equal(teacherAgain.status, 200);
+    assert.equal(teacherAgain.account.role, 'teacher');
+    assert.equal(teacherAgain.account.schoolCode, school.account.schoolCode);
+    assert.equal((await call('login', { ...managerLogin, school: 'مدرسة ب' })).status, 401);
+    assert.equal((await call('login', { ...managerLogin, school: copiedSchoolName, pin: '12457897' })).status, 401);
+
+    const similarName = { ...managerLogin, school: 'مدرسة ا', pin: '75926841' };
+    const similarSchool = await call('register', similarName);
+    assert.equal(similarSchool.status, 200);
+    const exactLogin = await call('login', similarName);
+    assert.equal(exactLogin.status, 200);
+    assert.equal(exactLogin.account.schoolCode, similarSchool.account.schoolCode);
+    assert.equal((await call('login', { ...managerLogin, school: similarName.school })).status, 401);
+
+    const duplicate = await call('register', managerLogin);
+    assert.equal(duplicate.status, 200);
+    const ambiguous = await call('login', managerLogin);
+    assert.equal(ambiguous.status, 401);
+    assert.match(ambiguous.error, /أكثر من مدرسة/u);
+    assert.match((await call('login', { ...managerLogin, school: copiedSchoolName })).error, /أكثر من مدرسة/u);
+    assert.equal((await call('login', { ...managerLogin, school: school.account.schoolCode })).status, 401);
   } finally {
     await new Promise(resolve => platform.close(resolve));
     await database.close();
