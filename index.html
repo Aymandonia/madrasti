@@ -3658,6 +3658,8 @@ function symbol(name) {
     grade:'m12 3 3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z',
     fact_check:'M3 4h18v16H3z M6 9l2 2 4-4 M14 9h4 M6 15h12',
     groups:'M8 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8 M1 21v-3c0-6 14-6 14 0v3 M17 4c5 0 5 8 0 8 M18 15c4 0 5 2 5 6',
+    person_add:'M15 21v-2a6 6 0 0 0-12 0v2 M9 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8 M19 8v6 M16 11h6',
+    login:'M10 17l5-5-5-5 M15 12H3 M14 3h6v18h-6',
     add:'M12 5v14 M5 12h14',download:'M12 3v12 M7 10l5 5 5-5 M4 16v5h16v-5',close:'M6 6l12 12 M6 18 18 6'
   };
   return paths[name]?`<svg class="symbol" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[name]}"/></svg>`:baseSymbol(name);
