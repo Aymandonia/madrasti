@@ -2275,9 +2275,9 @@ function loginScreen() {
   return `<div class="login"><div class="card online-login"><div class="brand"><div class="mark">${symbol('menu_book')}</div><span class="brand-text">مدرستي</span></div>
     <h1>${register ? 'إنشاء حساب المدرسة' : 'تسجيل الدخول'}</h1><p class="hint">${sub}</p>
     <form class="form" onsubmit="login(event)">
-    ${register ? '<label>اسم المدرسة<input name="school" autocomplete="organization" maxlength="120" required></label>' : '<label>معرّف المدرسة<input name="schoolCode" dir="ltr" maxlength="12" autocapitalize="characters" required></label>'}
+    <label>اسم المدرسة<input name="school" autocomplete="organization" maxlength="120" required></label>
     <label>${register ? 'اسم المدير الثلاثي' : 'الاسم'}<input name="name" autocomplete="username" maxlength="120" required></label>
-    <label>رمز الدخول من ٨ أرقام<input name="pin" dir="ltr" type="password" inputmode="numeric" maxlength="8" autocomplete="${register ? 'new-password' : 'current-password'}" required></label>
+    <label>${register ? "رمز المدير من ٨ أرقام" : "الرمز السري"}<input name="pin" dir="ltr" type="password" inputmode="numeric" maxlength="8" autocomplete="${register ? 'new-password' : 'current-password'}" required></label>
     <div id="loginError" class="login-error" role="alert"></div><button class="btn" type="submit">${register ? 'إنشاء الحساب والدخول' : 'دخول'}</button></form>
     <button class="btn outline demo-button" onclick="loginView='${register ? 'login' : 'register'}';render()">${symbol(register ? 'login' : 'person_add')} ${register ? 'العودة لتسجيل الدخول' : 'إنشاء حساب'}</button></div></div>`;
 }
@@ -2351,7 +2351,6 @@ async function login(event) {
     page = 'home';
     filter = selectedClass = selectedTeacherId = gradeSubject = scheduleGroup = scheduleDay = '';
     render();
-    if (creating) account();
   } catch (error) {
     $('#loginError').textContent = error.status ? error.message : (error.name === 'TypeError' ? 'تعذر الاتصال بالخادم. تحقق من إعداد Render.' : error.message);
   } finally {
@@ -2384,7 +2383,7 @@ function openTeacherTool(route) {
   go(route);
 }
 function account() {
-  dialog(`<h2>الحساب</h2><p class="hint">${esc(cloud.account.name)} · ${esc(db.role)}</p><p class="hint">معرّف المدرسة <strong dir="ltr">${esc(cloud.account.schoolCode)}</strong></p>
+  dialog(`<h2>الحساب</h2><p class="hint">${esc(cloud.account.name)} · ${esc(db.role)}</p>
   <div class="form"><button class="btn outline" onclick="closeModal();theme()">تغيير المظهر</button><button class="btn outline" onclick="signOut()">تسجيل الخروج</button></div>
   <div class="dialog-actions"><button class="btn outline" onclick="closeModal()">إغلاق</button></div>`);
 }
@@ -2932,7 +2931,7 @@ function teacherForm(key) {
     <form id="teacherForm" class="form" onsubmit="event.preventDefault();saveTeacher('${key || ''}')">
     <label>اسم المدرس<input id="name" maxlength="120" value="${esc(teacher?.name || '')}" required></label>
     <label>رقم الهاتف (اختياري)<input id="teacherPhone" dir="ltr" type="tel" maxlength="22" value="${esc(teacher?.phone || '')}" placeholder="07XXXXXXXXX"></label>
-    ${teacher ? '' : '<label>رمز دخول يختاره المدير من ٨ أرقام<input id="teacherPin" dir="ltr" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" required></label>'}
+    ${teacher ? '' : '<label>رمز دخول المدرس من ٤ أرقام<input id="teacherPin" dir="ltr" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" required></label>'}
     <div id="err" class="error" role="alert"></div>
     <div class="dialog-actions"><button type="button" class="btn outline" onclick="closeModal()">إلغاء</button><button class="btn" type="submit">حفظ</button></div></form>`);
 }
@@ -2944,7 +2943,7 @@ function saveTeacher(key) {
   if (!name || name === cloud.account.name || db.teachers.some(t => t.name === name && t.id !== key))
     return $('#err').textContent = 'أدخل اسماً غير مستخدم في المدرسة';
   if (rawPhone && !phone) return $('#err').textContent = 'تحقق من رقم الهاتف أو اتركه فارغاً';
-  if (!teacher && !/^\d{8}$/.test(pin)) return $('#err').textContent = 'أدخل رمزاً من ثمانية أرقام';
+  if (!teacher && !/^\d{4}$/.test(pin)) return $('#err').textContent = 'أدخل رمزاً من أربعة أرقام';
   if (teacher) {
     for (const lesson of db.schedule) if (lesson.teacher === teacher.name) lesson.teacher = name;
     Object.assign(teacher, { name, phone });
@@ -2962,14 +2961,14 @@ function teacherPinForm(key) {
   if (!teacher) return;
   dialog(`<h2>تغيير رمز الدخول</h2><p class="hint">${esc(teacher.name)}</p>
     <form class="form" onsubmit="event.preventDefault();saveTeacherPin('${teacher.id}')">
-    <label>الرمز الجديد من ٨ أرقام<input id="teacherPin" dir="ltr" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" required></label>
+    <label>الرمز الجديد من ٤ أرقام<input id="teacherPin" dir="ltr" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" required></label>
     <div id="err" class="error" role="alert"></div>
     <div class="dialog-actions"><button type="button" class="btn outline" onclick="closeModal()">إلغاء</button><button class="btn" type="submit">حفظ</button></div></form>`);
 }
 function saveTeacherPin(key) {
   const teacher = db.teachers.find(t => t.id === key);
   const pin = normalizePin($('#teacherPin').value);
-  if (!teacher || !/^\d{8}$/.test(pin)) return $('#err').textContent = 'أدخل رمزاً من ثمانية أرقام';
+  if (!teacher || !/^\d{4}$/.test(pin)) return $('#err').textContent = 'أدخل رمزاً من أربعة أرقام';
   save({ id: key, pin }, () => showTeacherAccess(teacher, pin));
   closeModal();
 }

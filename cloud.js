@@ -164,7 +164,7 @@ function whatsappPhone(value) {
 }
 function showTeacherAccess(teacher, pin) {
   const message = ['بيانات دخول منصة مدرستي', 'الرابط: ' + location.origin + location.pathname,
-    'معرّف المدرسة: ' + cloud.account.schoolCode, 'الاسم: ' + teacher.name, 'الرمز: ' + pin].join('\n');
+    'اسم المدرسة: ' + db.school, 'الاسم: ' + teacher.name, 'الرمز: ' + pin].join('\n');
   const phone = whatsappPhone(teacher.phone || '');
   const link = phone ? '<a class="btn" target="_blank" rel="noopener noreferrer" href="https://wa.me/' + phone + '?text=' + esc(encodeURIComponent(message)) + '">مشاركة عبر واتساب</a>' : '';
   dialog(`<h2>بيانات دخول المدرس</h2><p class="hint" style="white-space:pre-line">${esc(message)}</p><div class="dialog-actions">${link}<button class="btn outline" onclick="closeModal()">إغلاق</button></div>`);

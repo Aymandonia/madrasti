@@ -18,6 +18,7 @@ const line = (value, max = 120) => {
   return value.trim().replace(/\s+/gu, ' ').normalize('NFC');
 };
 const pinOk = value => typeof value === 'string' && /^[0-9]{8}$/.test(value);
+const teacherPinOk = value => typeof value === 'string' && /^[0-9]{4}$/.test(value);
 const lists = ['teachers', 'classes', 'subjects', 'students', 'schedule', 'homework', 'announcements', 'teacherNotifications'];
 const maps = ['attendance', 'grades'];
 const settings = ['school', 'schoolType', 'year'];
@@ -288,17 +289,24 @@ export async function createPlatform(db, { secret, origin, proxy = false } = {})
       if (method === 'POST' && path === '/api/login') {
         await limit('login-ip:' + ip, 30);
         const input = await body(req);
-        const code = line(input.schoolCode, 12).toUpperCase(), name = line(input.name);
-        requireThat(/^[A-F0-9]{12}$/.test(code) && pinOk(input.pin));
-        await limit('login-account:' + code + ':' + name, 8);
-        const { rows: [row] } = await db.query('SELECT * FROM madrasti_schools WHERE code=$1', [code]);
-        const teacher = row?.data.teachers.find(t => t.name === name && !t.disabled);
-        const id = row?.manager === name ? 'manager' : teacher?.id;
-        const stored = (id && credentialFor(row, id)) || dummy;
-        const actual = await hash(input.pin, stored.split(':')[0]);
-        requireThat(timingSafeEqual(Buffer.from(stored), Buffer.from(actual)) && id && credentialFor(row, id),
-          401, 'معرّف المدرسة أو الاسم أو الرمز غير صحيح');
-        return send(200, await session(row, id));
+        const school = line(input.school), name = line(input.name);
+        requireThat(pinOk(input.pin) || teacherPinOk(input.pin));
+        await limit('login-account:' + school + ':' + name, 8);
+        const { rows } = await db.query("SELECT * FROM madrasti_schools WHERE data->>'school'=$1", [school]);
+        const candidates = rows.flatMap(row => {
+          const teacher = row.data.teachers.find(t => t.name === name && !t.disabled);
+          const id = row.manager === name ? 'manager' : teacher?.id;
+          const stored = id && credentialFor(row, id);
+          return stored ? [{ row, id, stored }] : [];
+        });
+        if (!candidates.length) candidates.push({ stored: dummy });
+        const matches = [];
+        for (const candidate of candidates) {
+          const actual = await hash(input.pin, candidate.stored.split(':')[0]);
+          if (candidate.id && timingSafeEqual(Buffer.from(candidate.stored), Buffer.from(actual))) matches.push(candidate);
+        }
+        requireThat(matches.length === 1, 401, 'اسم المدرسة أو الاسم أو الرمز غير صحيح، أو الحساب غير محدد');
+        return send(200, await session(matches[0].row, matches[0].id));
       }
       requireThat(['/api/state', '/api/logout'].includes(path), 404, 'الصفحة غير موجودة');
       const token = /^Bearer ([\w-]{43})$/.exec(req.headers.authorization ?? '')?.[1];
@@ -326,7 +334,7 @@ export async function createPlatform(db, { secret, origin, proxy = false } = {})
         credentials = subset(credentials, key => data.teachers.some(t => t.id === key));
         if (input.credential) {
           const { id: teacherId, pin } = input.credential;
-          requireThat(teacherId !== 'manager' && pinOk(pin) && data.teachers.some(t => t.id === teacherId));
+          requireThat(teacherId !== 'manager' && teacherPinOk(pin) && data.teachers.some(t => t.id === teacherId));
           credentials[teacherId] = await hash(pin);
         }
         for (const teacher of data.teachers) {
