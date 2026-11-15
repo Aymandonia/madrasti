@@ -1368,6 +1368,93 @@ body.dark{color-scheme:dark;--bg:#111d19;--card:#1a2923;--raised:#17251f;--field
   }
   @media (prefers-reduced-motion: reduce) { .nav button, .btn, .iconbtn, .school, .role-option { transition: none; } }
 }
+
+/* School setup, daily work and schedule views. */
+@media screen {
+  html { scroll-padding-block: 80px 20px; }
+  .top > .top-brand { flex: 1 1 auto; }
+  .top-brand > .symbol, .top-actions > .iconbtn, .top-actions > .telegram-link { flex: none; }
+  .top-actions #syncStatus { flex: none; font-size: 12px; white-space: nowrap; }
+  .sync-recovery {
+    position: sticky; top: 76px; z-index: 2;
+    display: flex; gap: 8px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    padding: 10px 30px; background: var(--card);
+    border-block-end: 1px solid var(--line); color: var(--error);
+  }
+  .sync-recovery p { flex: 1 1 240px; min-width: 0; }
+  .sync-recovery .btn { padding-inline: 12px; }
+  .task-panel {
+    min-width: 0; padding: 18px;
+    border: 1px solid var(--line); border-radius: 14px; background: var(--card);
+  }
+  .task-panel h2 { font-size: 19px; line-height: 1.4; }
+  .task-heading {
+    display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 12px;
+  }
+  .task-heading > span, .task-panel p, .school-setup li small { color: var(--muted); }
+  .task-panel p, .workflow-empty p { font-size: 15px; line-height: 1.65; }
+  .workflow-empty { display: grid; justify-items: start; gap: 7px; text-align: start; }
+  .workflow-empty > strong { font-size: 17px; line-height: 1.4; }
+  .workflow-empty .btn, .school-setup > .btn, .teacher-today > .btn { margin-block-start: 8px; }
+  .card-head + .workflow-empty { margin-block-start: 14px; }
+  .school-setup { margin-block-end: 24px; }
+  .school-setup ol { list-style: none; padding: 0; margin: 12px 0 4px; }
+  .school-setup li {
+    display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center;
+    gap: 10px; min-height: 44px; padding: 4px 8px; border-block-start: 1px solid var(--line);
+  }
+  .school-setup li[aria-current="step"] { background: var(--pale); color: var(--on-pale); font-weight: 700; }
+  .school-setup li[aria-current="step"] small { color: var(--on-pale); }
+  .step-mark {
+    display: grid; place-items: center; width: 26px; height: 26px;
+    border-radius: 50%; background: var(--field); font-variant-numeric: tabular-nums;
+  }
+  .school-setup li[aria-current="step"] .step-mark { background: var(--primary); color: var(--on-primary); }
+  .school-summary > .manager-stats, .teacher-home > .manager-stats { margin: 0 0 12px; }
+  .teacher-home > .dashboard-hero { margin-block-end: 16px; }
+  .teacher-daily { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-block-end: 16px; }
+  .teacher-daily > :only-child { grid-column: 1 / -1; }
+  .teacher-today p { margin-block: 8px; }
+  .teacher-classes ul { padding-inline-start: 22px; margin-block: 8px 12px; overflow-wrap: anywhere; }
+  .teacher-classes .actions { gap: 8px; }
+  .schedule-controls {
+    display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between;
+    gap: 12px; margin-block-end: 16px;
+  }
+  .schedule-filters {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+    flex: 1 1 300px; min-width: 0;
+  }
+  .schedule-filters label { min-width: 0; font-size: 14px; font-weight: 700; }
+  .schedule-filters select { width: 100%; font-size: 16px; }
+  .teacher-content > .schedule-filters { margin-block-end: 16px; }
+  .schedule-views { display: flex; flex-wrap: wrap; gap: 8px; }
+  .schedule-views .btn { padding-inline: 12px; }
+  .schedule-views [aria-pressed="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--primary); }
+  .schedule-day .task-heading, .teacher-today .task-heading { margin-block-end: 8px; }
+  .schedule-edit {
+    width: 100%; min-height: 54px; border: 0; border-block-start: 1px solid var(--line);
+    background: transparent; color: var(--ink); text-align: start;
+  }
+  .schedule-edit:hover { background: var(--field); }
+  .schedule-edit > .symbol { color: var(--primary); }
+  .schedule-details { min-width: 0; overflow-wrap: anywhere; }
+  .schedule-matrix-wrap:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+  @media (max-width: 900px) {
+    .sync-recovery { top: 68px; padding-inline: 16px; }
+  }
+  @media (max-width: 700px) {
+    html { scroll-padding-block: 72px calc(86px + env(safe-area-inset-bottom, 0px)); }
+    .content { padding-block-end: calc(96px + env(safe-area-inset-bottom, 0px)); }
+    .mobile button { font-size: 12px; }
+    .mobile .nav-label { white-space: normal; max-width: 100%; text-wrap: balance; }
+    .top .top-actions { gap: 4px; }
+    .teacher-daily { grid-template-columns: minmax(0, 1fr); }
+    .task-panel { padding: 14px; }
+    .schedule-lesson { grid-template-columns: minmax(44px, 4rem) minmax(0, 1fr) auto; }
+  }
+}
+
 </style>
 <script type="text/plain" id="fontLicenses">
 Cairo-LICENSE
@@ -2344,6 +2431,11 @@ function go(p) {
   location.hash = p;
   render();
   window.scrollTo(0, 0);
+  const heading = $('.content h1');
+  if (heading) {
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }
 }
 function title(t, sub = '', action = '') {
   return `<div class="head"><div><h1>${t}</h1>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${action}</div>`;
@@ -2401,7 +2493,7 @@ function mobileMenu() {
     : ['home', 'teachers', 'classes', 'schedule'];
   return (
     shortcuts.map((key) => pageButton(entries.find(([route]) => route === key))).join('') +
-    (isTeacher() ? '' : `<button ${page === 'more' ? 'class="active" aria-current="page"' : ''} onclick="more()"><span class="nav-icon">${symbol('more_vert')}</span><span class="nav-label">المزيد</span></button>`)
+    (isTeacher() ? '' : `<button ${!shortcuts.includes(page) ? 'class="active"' : ''} ${page === 'more' ? 'aria-current="page"' : ''} onclick="more()"><span class="nav-icon">${symbol('more_vert')}</span><span class="nav-label">المزيد</span></button>`)
   );
 }
 function loginScreen() {
@@ -2493,17 +2585,24 @@ function render() {
       exams: nativeExams,
     }[page] || home
   )();
-  const label = ({more:'المزيد',curriculum:'متابعة المنهج',statistics:'إحصائيات النتائج',certificates:'شهادات التقدير',exams:'مفكرة الامتحانات'})[page] || roleNav().find(([route]) => route === page)[2];
-  const pageIcon = roleNav().find(([route]) => route === page)?.[1] || 'work';
+  const showManagerExport = ['performance','announcements','teacherNotifications','schoolSettings','schools'].includes(page) ||
+    (page === 'teachers' && db.teachers.length) ||
+    (page === 'classes' && (db.classes.length || db.subjects.length));
+  let exportControls = '';
+  if (isTeacher() && ['students','attendance','grades','schedule','curriculum','statistics','certificates','exams'].includes(page)) {
+    exportControls = nativeTeacherActions();
+  } else if (!isTeacher() && showManagerExport) {
+    exportControls = exportActions('manager');
+  }
   $('#root').innerHTML = `<div class="layout">
     <aside class="sidebar"><div class="brand"><div class="mark">${symbol('menu_book')}</div><div class="brand-text">مدرستي<small>${esc(db.role)}</small></div></div>
       <nav class="nav" aria-label="التنقل الرئيسي">${menu()}</nav>
       <div class="account"><div class="nav"><button onclick="account()">${symbol('settings')}<span class="account-text">إعدادات الحساب</span></button></div></div>
-    </aside><main><header class="top"><div class="top-brand">${symbol(page === 'home' ? 'menu_book' : pageIcon)}<div class="top-name"><strong>${page === 'home' ? 'مدرستي' : label}</strong><small>${esc(db.school)}</small></div></div>
-      <div class="top-actions"><small id="syncStatus" role="status"></small><button id="syncRecovery" hidden class="btn outline small" onclick="recoverSync()">معالجة الحفظ</button><button class="iconbtn account-shortcut" onclick="account()" aria-label="الحساب">${symbol('person')}</button><a class="telegram-link" href="https://t.me/aymanmanaf" target="_blank" rel="noopener noreferrer" aria-label="قناة تليجرام للمطور"><svg class="telegram-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21.4 3.8 18.2 19c-.2 1.1-.9 1.4-1.8.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.2L5.8 12.8l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20 2.5c.9-.3 1.7.2 1.4 1.3Z" fill="currentColor"/></svg> <span>قناة تليجرام</span></a><button class="iconbtn" onclick="theme()" aria-label="تغيير المظهر">${symbol(db.theme === 'dark' ? 'light_mode' : 'dark_mode')}</button>
+    </aside><main><header class="top"><div class="top-brand">${symbol('menu_book')}<div class="top-name"><strong title="${esc(db.school)}">${esc(db.school)}</strong><small>${esc(db.role)}</small></div></div>
+      <div class="top-actions"><small id="syncStatus" role="status"></small><button class="iconbtn account-shortcut" onclick="account()" aria-label="الحساب">${symbol('person')}</button><a class="telegram-link" href="https://t.me/aymanmanaf" target="_blank" rel="noopener noreferrer" aria-label="قناة تليجرام للمطور"><svg class="telegram-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21.4 3.8 18.2 19c-.2 1.1-.9 1.4-1.8.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.2L5.8 12.8l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20 2.5c.9-.3 1.7.2 1.4 1.3Z" fill="currentColor"/></svg> <span>قناة تليجرام</span></a><button class="iconbtn" onclick="theme()" aria-label="تغيير المظهر">${symbol(db.theme === 'dark' ? 'light_mode' : 'dark_mode')}</button>
       
       <button class="school" onclick="account()" aria-label="حساب ${esc(db.school)}">${symbol('person')}<span>الحساب</span></button></div>
-    </header><div class="content ${isTeacher() ? 'teacher-content' : ''}">${content}${isTeacher() && ['students','attendance','grades','schedule','curriculum','statistics','certificates','exams'].includes(page) ? nativeTeacherActions() : (!isTeacher() && ['teachers','classes','performance','announcements','teacherNotifications','schoolSettings','schools'].includes(page) ? exportActions('manager') : '')}</div></main></div><nav class="mobile ${isTeacher() ? 'teacher-mobile' : ''}" aria-label="التنقل الرئيسي">${mobileMenu()}</nav>`;
+    </header><section id="syncRecovery" class="sync-recovery" hidden><p id="syncMessage" role="alert"></p><button id="syncAction" class="btn outline" onclick="recoverSync()">إعادة محاولة الحفظ</button></section><div class="content ${isTeacher() ? 'teacher-content' : ''}">${content}${exportControls}</div></main></div><nav class="mobile ${isTeacher() ? 'teacher-mobile' : ''}" aria-label="التنقل الرئيسي">${mobileMenu()}</nav>`;
   syncStatus();
   if (page === 'teacherTools') mountTeacherTools();
 }
@@ -2537,7 +2636,8 @@ async function login(event) {
     rememberSession(result.token);
     installSchool(result);
     page = 'home';
-    filter = selectedClass = selectedTeacherId = gradeSubject = scheduleGroup = scheduleDay = '';
+    if (location.hash) history.replaceState(null, '', '#home');
+    filter = selectedClass = selectedTeacherId = gradeSubject = scheduleGroup = scheduleDay = scheduleView = '';
     render();
   } catch (error) {
     errorMessage.textContent = error.status ? error.message : 'تعذر الاتصال بالخادم. حاول مرة أخرى.';
@@ -2556,7 +2656,7 @@ function more() {
   go('more');
 }
 function morePage() {
-  if (!isTeacher()) return `${title('المزيد', 'أدوات الإدارة', `<button class="btn outline" onclick="go('home')">العودة</button>`)}<div class="more-tools">${[['teacherNotifications','notifications','إشعارات المدرسين','قراءة تقارير المدرسين'],['reports','description','التقارير الإدارية','عرض التقارير'],['announcements','info','الإعلانات','إدارة إعلانات المدرسة'],['schoolSettings','settings','الإعدادات','بيانات المدرسة والمظهر']].map(([route,icon,label,hint]) => `<button class="more-tool" onclick="go('${route}')"><span class="more-tool-icon">${symbol(icon)}</span><span><strong>${label}</strong><small>${hint}</small></span>${symbol('chevron_left')}</button>`).join('')}</div><h2 class="dashboard-title overview-title">ملخص المدرسة</h2>${managerOverview()}`;
+  if (!isTeacher()) return `${title('المزيد')}<div class="more-tools">${[['teacherNotifications','notifications','إشعارات المدرسين','قراءة تقارير المدرسين'],['reports','description','التقارير الإدارية','عرض التقارير'],['announcements','info','الإعلانات','إدارة إعلانات المدرسة'],['schoolSettings','settings','الإعدادات','بيانات المدرسة والمظهر']].map(([route,icon,label,hint]) => `<button class="more-tool" onclick="go('${route}')"><span class="more-tool-icon">${symbol(icon)}</span><span><strong>${label}</strong><small>${hint}</small></span>${symbol('chevron_left')}</button>`).join('')}</div>`;
   const tools = [
     ['curriculum', 'menu_book', 'متابعة المنهج', 'آخر درس لكل شعبة'],
     ['statistics', 'grading', 'إحصائيات النتائج', 'نسب النجاح ونتائج الامتحانات'],
@@ -2845,27 +2945,32 @@ function teacherHome() {
   const studentCount = db.students.filter((student) =>
     assignments.some((a) => a.group === student.group),
   ).length;
-  const lessons = db.schedule.filter(
-    (lesson) =>
-      lesson.teacher === teacher?.name &&
-      assignments.some((a) => a.group === lesson.group && a.subject === lesson.subject),
-  );
+  const groups = classes();
+  const lessons = visibleSchedule();
+  const schoolDay = schoolDays[new Date().getDay()];
+  const todayLessons = schoolDay ? lessons.filter(lesson => lesson.day === schoolDay) : [];
+  const dailyWork = groups.length
+    ? `<section class="teacher-today task-panel"><div class="task-heading"><h2>حصص اليوم</h2>${schoolDay ? `<span>${schoolDay}</span>` : ''}</div>
+      ${todayLessons.length ? scheduleLessonRows(todayLessons) : '<p>لا توجد حصص اليوم.</p>'}
+      <button class="btn outline" onclick="go('schedule')">عرض الجدول</button></section>
+      <section class="task-panel teacher-classes"><h2>فصولي</h2><ul>${groups.map(group => `<li>${esc(group)}</li>`).join('')}</ul>
+      <div class="actions"><button class="btn" onclick="go('attendance')">تسجيل الحضور</button><button class="btn outline" onclick="go('grades')">رصد الدرجات</button></div></section>`
+    : `<section class="task-panel teacher-today"><h2>لم تُسند إليك فصول بعد</h2><p>تظهر فصولك وحصصك هنا بعد إسنادها من مدير المدرسة.</p></section>`;
   const tasks = db.homework.filter((item) =>
     assignments.some((a) => a.group === item.group && a.subject === item.subject),
   );
   return `<div class="teacher-home"><section class="dashboard-hero"><div class="manager-heading"><div><h1>لوحة متابعة المدرس</h1><p>${esc(teacher?.name || 'المدرس')}</p></div><span class="dashboard-emblem">${symbol('menu_book')}</span></div>
-    <div class="manager-stats">${[
-      ['فصولي', classes().length, 'students'],
+    </section><div class="teacher-daily">${dailyWork}</div><div class="manager-stats">${[
       ['الطلاب', studentCount, 'students'],
-      ['حصصي في الجدول', lessons.length, 'schedule'],
+      ['الحصص الأسبوعية', lessons.length, 'schedule'],
       ['الواجبات', tasks.length, 'homework'],
     ]
       .map(
         ([label, value, target]) =>
           `<button class="manager-stat" onclick="go('${target}')"><strong>${num(value)}</strong><span>${label}</span></button>`,
       )
-      .join('')}</div></section>
-    <section class="dashboard-tools"><h2 class="dashboard-title">المهام اليومية</h2>${dashboardTiles(['students', 'attendance', 'grades', 'homework', 'reports'], `<button class="tool-tile" onclick="more()"><span class="tool-icon">${symbol('more_vert')}</span><span>المزيد</span></button>`)}</section></div>`;
+      .join('')}</div>
+    <section class="dashboard-tools"><h2 class="dashboard-title">أدوات المدرس</h2>${dashboardTiles(['students', 'homework', 'reports'], `<button class="tool-tile" onclick="more()"><span class="tool-icon">${symbol('more_vert')}</span><span>المزيد</span></button>`)}</section></div>`;
 }
 function managerOverview() {
   const currentLeaves = db.teachers.filter((t) =>
@@ -2877,8 +2982,41 @@ function managerOverview() {
   const avg = recorded.length
     ? Math.round(recorded.reduce((sum, value) => sum + value, 0) / recorded.length)
     : null;
-  return `<div class="dashboard-overview"><button onclick="go('performance')"><span>متوسط الدرجات المسجلة</span><strong>${avg === null ? '—' : num(avg) + '٪'}</strong><small>${avg === null ? 'لا توجد درجات' : num(recorded.length) + ' درجة مسجلة'}</small></button><button onclick="go('teachers')"><span>المدرسون في إجازة اليوم</span><strong>${num(currentLeaves)}</strong><small>عرض المدرسين ←</small></button></div>`;
+  return `<div class="dashboard-overview"><button onclick="go('performance')"><span>متوسط الدرجات المسجلة</span><strong>${avg === null ? '—' : num(avg) + '٪'}</strong><small>${avg === null ? 'لا توجد درجات' : num(recorded.length) + ' درجة مسجلة'}</small></button><button onclick="go('teachers')"><span>المدرسون في إجازة اليوم</span><strong>${num(currentLeaves)}</strong><small>عرض المدرسين</small></button></div>`;
 }
+function emptyTask(title, detail, label, action) {
+  return `<div class="workflow-empty"><strong>${title}</strong>${detail ? `<p>${detail}</p>` : ''}${label ? `<button class="btn" onclick="${esc(action)}">${label}</button>` : ''}</div>`;
+}
+
+function openTeacherAssignment() {
+  selectedTeacherId = db.teachers.length === 1 ? db.teachers[0].id : '';
+  go('teachers');
+}
+
+function schoolSetupSteps(group = '') {
+  const hasAssignment = db.teachers.some(teacher => teacher.assignments.some(assignment =>
+    (!group || group === assignment.group) &&
+    db.classes.some(entry => entry.name === assignment.group) &&
+    db.subjects.some(entry => entry.name === assignment.subject)
+  ));
+  return [
+    { title: 'إضافة فصل', done: db.classes.length, action: "go('classes');simpleAdd('classes','فصل')", label: 'إضافة أول فصل' },
+    { title: 'إضافة مادة', done: db.subjects.length, action: "go('classes');simpleAdd('subjects','مادة')", label: 'إضافة أول مادة' },
+    { title: 'إنشاء حساب مدرس', done: db.teachers.length, action: "go('teachers');teacherForm()", label: 'إنشاء حساب مدرس' },
+    { title: 'إسناد فصل ومادة', done: hasAssignment, action: 'openTeacherAssignment()', label: 'إسناد فصل ومادة' },
+    { title: 'إضافة حصة', done: db.schedule.length, action: "resetScheduleFilters();go('schedule');scheduleForm()", label: 'إضافة أول حصة' },
+  ];
+}
+
+function managerSetup() {
+  const steps = schoolSetupSteps();
+  const next = steps.find(step => !step.done);
+  if (!next) return '';
+  return `<section class="task-panel school-setup"><div class="task-heading"><h2>إعداد المدرسة</h2><span>${num(steps.filter(step => step.done).length)} من ${num(steps.length)}</span></div>
+    <ol>${steps.map((step, index) => `<li ${step === next ? 'aria-current="step"' : ''}><span class="step-mark" aria-hidden="true">${num(index + 1)}</span><span>${step.title}</span><small>${step.done ? 'تمت' : step === next ? 'الخطوة التالية' : 'متبقية'}</small></li>`).join('')}</ol>
+    <button class="btn" onclick="${next.action}">${next.label}</button></section>`;
+}
+
 function managerHome() {
   const stats = [
     ['المدرسون', db.teachers.length, 'teachers'],
@@ -2887,15 +3025,13 @@ function managerHome() {
     ['الحصص الأسبوعية', db.schedule.length, 'schedule'],
   ];
   return `<div class="manager-home">
-    <section class="dashboard-hero"><div class="manager-heading"><div><h1>لوحة متابعة المدير</h1><p>${esc(db.schoolType)} · ${esc(db.year)}</p></div><span class="dashboard-emblem">${symbol('verified_user')}</span></div>
-    <div class="manager-stats">${stats
-      .map(
-        ([label, count, target]) =>
-          `<button class="manager-stat" onclick="go('${target}')"><strong>${num(count)}</strong><span>${label}</span></button>`,
-      )
-      .join('')}</div></section>
+    ${title('لوحة متابعة المدير', esc(db.schoolType) + ' · ' + esc(db.year))}
+    ${managerSetup()}
+    <section class="school-summary"><h2 class="dashboard-title">ملخص المدرسة</h2>
+    <div class="manager-stats">${stats.map(([label, count, target]) =>
+      `<button class="manager-stat" onclick="go('${target}')"><strong>${num(count)}</strong><span>${label}</span></button>`
+    ).join('')}</div>${managerOverview()}</section>
     <section class="dashboard-tools"><h2 class="dashboard-title">مهام الإدارة</h2>${dashboardTiles(['teachers', 'classes', 'schedule', 'performance', 'teacherNotifications'], `<button class="tool-tile" onclick="more()"><span class="tool-icon">${symbol('more_vert')}</span><span>المزيد</span></button>`)}</section>
-
   </div>`;
 }
 function performance() {
@@ -3071,14 +3207,17 @@ function teachers() {
   const teacher = db.teachers.find((entry) => entry.id === selectedTeacherId);
   if (teacher) return teacherProfile(teacher);
   selectedTeacherId = '';
+  if (!db.teachers.length) {
+    return title('المدرسون') + `<section class="task-panel">${emptyTask('لا يوجد مدرسون بعد', 'أنشئ حساباً ليتمكن المدرس من تسجيل الدخول وتلقي تكليفاته.', 'إنشاء أول حساب مدرس', 'teacherForm()')}</section>`;
+  }
   return `${title('المدرسون', `${num(db.teachers.length)} مدرس`, '<button class="btn" onclick="teacherForm()">＋ إنشاء حساب مدرس</button>')}
     <div class="card list-card teacher-list">${
       db.teachers
         .map(
           (entry) => `<button class="person-row" onclick="openTeacher('${entry.id}')">
-      <span class="avatar">${esc(entry.name[0] || '•')}</span><span class="row-main"><strong>${esc(entry.name)}</strong><small>${entry.disabled ? 'الحساب معطل · ' : ''}${num(entry.assignments.length)} تكليف · ${num(entry.assignments.reduce((sum, a) => sum + a.weekly, 0))} حصة أسبوعياً</small></span>${symbol('chevron_left')}</button>`,
+      <span class="avatar">${esc(entry.name[0] || '•')}</span><span class="row-main"><strong>${esc(entry.name)}</strong><small>${entry.disabled ? 'حساب معطّل' : 'حساب نشط'} · ${num(entry.assignments.length)} تكليف · ${num(entry.assignments.reduce((sum, a) => sum + a.weekly, 0))} حصة أسبوعياً</small></span>${symbol('chevron_left')}</button>`,
         )
-        .join('') || '<div class="empty">لا يوجد مدرسون</div>'
+        .join('')
     }</div>`;
 }
 function openTeacher(id) {
@@ -3108,7 +3247,10 @@ function teacherProfile(teacher) {
     .join('');
   return `<button class="back-link" onclick="selectedTeacherId='';render()">${symbol('arrow_forward')} جميع المدرسين</button>
     ${title(esc(teacher.name), `${num(teacher.assignments.reduce((sum, a) => sum + a.weekly, 0))} حصة مكلفة أسبوعياً`, `<button class="btn secondary" onclick="teacherForm('${teacher.id}')">تعديل البيانات</button>`)}
-    <div class="teacher-profile-grid"><section class="card"><div class="card-head"><h2>التكليفات</h2><button class="link" onclick="assignmentForm('${teacher.id}')">＋ إضافة تكليف</button></div>${assignments || '<p class="hint">لا توجد تكليفات</p>'}</section>
+    <div class="teacher-profile-grid"><section class="card"><div class="card-head"><h2>التكليفات</h2>${assignments ? `<button class="btn small secondary" onclick="assignmentForm('${teacher.id}')">إضافة تكليف</button>` : ''}</div>
+      ${assignments || (db.classes.length && db.subjects.length
+        ? emptyTask('لا توجد تكليفات', 'حدّد الفصل والمادة وعدد الحصص الأسبوعية.', 'إضافة أول تكليف', 'assignmentForm(selectedTeacherId)')
+        : emptyTask('أكمل إعداد الفصول والمواد', 'تحتاج إلى فصل ومادة لإسنادهما إلى المدرس.', 'فتح الفصول والمواد', "go('classes')"))}</section>
     <section class="card"><div class="card-head"><h2>الإجازات</h2><button class="link" onclick="leaveForm('${teacher.id}')">＋ إضافة إجازة</button></div>${leaves || '<p class="hint">لا توجد إجازات</p>'}</section></div>
     <section class="card account-controls"><div class="card-head"><h2>حساب المدرس</h2><span class="badge">${teacher.disabled ? 'معطل' : 'نشط'}</span></div><p class="hint">رقم الهاتف: <bdi>${esc(teacher.phone || "غير مضاف")}</bdi></p><div class="actions"><button class="btn secondary" onclick="teacherPinForm('${teacher.id}')">تغيير الرمز</button><button class="btn outline" onclick="toggleTeacher('${teacher.id}')">${teacher.disabled ? 'تفعيل الحساب' : 'تعطيل الحساب'}</button></div></section>
     <div class="profile-actions"><button class="btn outline" onclick="deleteTeacher('${teacher.id}')">حذف المدرس</button></div>`;
@@ -3296,11 +3438,23 @@ function removeLeave(teacherId, leaveId) {
 
 // الفصول والمواد
 function classPage() {
-  return `${title('الفصول والمواد', 'تنظيم الفصول والمواد الدراسية')}<div class="dashboard"><div class="card"><div class="card-head"><h2>الفصول</h2><button class="btn small secondary" onclick="simpleAdd('classes','فصل')">＋ إضافة فصل</button></div>${db.classes.map((x) => row(x.name, `تكليفات المدرسين: ${num(db.teachers.filter((teacher) => teacher.assignments.some((a) => a.group === x.name)).length)}`, `<button class="btn small outline" onclick="del('classes','${x.id}')">حذف</button>`)).join('')}</div><div class="card"><div class="card-head"><h2>المواد</h2><button class="btn small secondary" onclick="simpleAdd('subjects','مادة')">＋ إضافة مادة</button></div>${db.subjects.map((x) => row(x.name, 'مادة دراسية', `<button class="btn small outline" onclick="del('subjects','${x.id}')">حذف</button>`)).join('')}</div></div>`;
+  const groups = db.classes.map(entry => row(entry.name,
+    `تكليفات المدرسين: ${num(db.teachers.filter(teacher => teacher.assignments.some(assignment => assignment.group === entry.name)).length)}`,
+    `<button class="btn small outline" onclick="del('classes','${entry.id}')">حذف</button>`
+  )).join('');
+  const courses = db.subjects.map(entry => row(entry.name, 'مادة دراسية',
+    `<button class="btn small outline" onclick="del('subjects','${entry.id}')">حذف</button>`
+  )).join('');
+  return `${title('الفصول والمواد')}<div class="dashboard">
+    <section class="task-panel"><div class="card-head"><h2>الفصول</h2>${groups ? `<button class="btn secondary" onclick="simpleAdd('classes','فصل')">إضافة فصل</button>` : ''}</div>
+    ${groups || emptyTask('لا توجد فصول بعد', 'أضف الصف والشعبة، مثل «الأول أ».', 'إضافة أول فصل', "simpleAdd('classes','فصل')")}</section>
+    <section class="task-panel"><div class="card-head"><h2>المواد</h2>${courses ? `<button class="btn secondary" onclick="simpleAdd('subjects','مادة')">إضافة مادة</button>` : ''}</div>
+    ${courses || emptyTask('لا توجد مواد بعد', 'أضف المواد التي تريد إسنادها للمدرسين.', 'إضافة أول مادة', "simpleAdd('subjects','مادة')")}</section>
+    </div>`;
 }
 function simpleAdd(type, label) {
   dialog(
-    `<h2>إضافة ${label}</h2><label>الاسم<input id="name"></label><div id="err" class="error"></div><div class="dialog-actions"><button class="btn outline" onclick="closeModal()">إلغاء</button><button class="btn" onclick="simpleSave('${type}')">حفظ</button></div>`,
+    `<h2>إضافة ${label}</h2><form class="form" onsubmit="event.preventDefault();simpleSave('${type}')"><label>الاسم<input id="name" required autofocus></label><div id="err" class="error" role="alert"></div><div class="dialog-actions"><button type="button" class="btn outline" onclick="closeModal()">إلغاء</button><button class="btn" type="submit">حفظ</button></div></form>`,
   );
 }
 function simpleSave(type) {
@@ -3321,14 +3475,17 @@ function simpleSave(type) {
 
 // الحضور
 function attendance() {
+  if (!classes().length) return title('الحضور') + `<section class="task-panel">${emptyTask('لم تُسند إليك فصول بعد', 'تواصل مع مدير المدرسة لإسناد فصل إليك.')}</section>`;
   selectedClass = classes().includes(selectedClass) ? selectedClass : classes()[0];
   let list = db.students.filter((x) => x.group === selectedClass);
-  return `${title('الحضور', 'تسجيل الحضور اليومي')}<div class="toolbar"><select aria-label="الفصل" onchange="selectedClass=this.value;render()">${options(classes(), selectedClass)}</select><input aria-label="التاريخ" type="date" value="${attendanceDate}" onchange="attendanceDate=this.value;render()"></div><div class="card list-card">${list.map(x => `<div class="attendance-entry"><div class="attendance-person"><span class="avatar">${esc(x.name[0] || '•')}</span><span><strong>${esc(x.name)}</strong><small>${esc(x.group)}</small></span></div><div class="attendance-choices" role="group" aria-label="حضور ${esc(x.name)}">${['حاضر','غائب','متأخر','بعذر','عطلة'].map(status => `<button type="button" class="${(db.attendance[attendanceDate+'|'+x.id] || 'حاضر') === status ? 'selected' : ''}" aria-pressed="${(db.attendance[attendanceDate+'|'+x.id] || 'حاضر') === status}" onclick="setAttendanceStatus('${x.id}','${status}')">${status}</button>`).join('')}</div></div>`).join('') || '<div class="empty">لا يوجد طلاب في هذا الفصل</div>'}</div><div style="margin-top:16px"><button class="btn" onclick="saveAttendance()">حفظ الحضور</button></div>`;
+  return `${title('الحضور', 'تسجيل الحضور اليومي')}<div class="toolbar"><select aria-label="الفصل" onchange="selectedClass=this.value;render()">${options(classes(), selectedClass)}</select><input aria-label="التاريخ" type="date" value="${attendanceDate}" onchange="attendanceDate=this.value;render()"></div><div class="card list-card">${list.map(x => `<div class="attendance-entry"><div class="attendance-person"><span class="avatar">${esc(x.name[0] || '•')}</span><span><strong>${esc(x.name)}</strong><small>${esc(x.group)}</small></span></div><div class="attendance-choices" role="group" aria-label="حضور ${esc(x.name)}">${['حاضر','غائب','متأخر','بعذر','عطلة'].map(status => `<button type="button" class="${(db.attendance[attendanceDate+'|'+x.id] || 'حاضر') === status ? 'selected' : ''}" aria-pressed="${(db.attendance[attendanceDate+'|'+x.id] || 'حاضر') === status}" data-student="${esc(x.id)}" data-status="${status}" onclick="setAttendanceStatus(this)">${status}</button>`).join('')}</div></div>`).join('') || '<div class="empty">لا يوجد طلاب في هذا الفصل</div>'}</div><div style="margin-top:16px"><button class="btn" onclick="saveAttendance()" ${list.length ? '': 'disabled'}>حفظ الحضور</button></div>`;
 }
-function setAttendanceStatus(id, status) {
+function setAttendanceStatus(control) {
+  const { student: id, status } = control.dataset;
   if (!db.students.some(x => x.id === id && x.group === selectedClass) || !['حاضر','غائب','متأخر','بعذر','عطلة'].includes(status)) return;
   db.attendance[attendanceDate+'|'+id] = status;
   render();
+  document.querySelector('[data-student="' + CSS.escape(id) + '"][data-status="' + status + '"]')?.focus({ preventScroll: true });
 }
 function saveAttendance() {
   db.students
@@ -3337,12 +3494,34 @@ function saveAttendance() {
       let k = attendanceDate + '|' + x.id;
       if (!db.attendance[k]) db.attendance[k] = 'حاضر';
     });
-  save();
+  save(null, () => toast('تم حفظ الحضور'));
 }
 
 // الجدول الأسبوعي
 let scheduleGroup = '';
 let scheduleDay = '';
+let scheduleView = '';
+const narrowSchedule = window.matchMedia('(max-width: 700px)');
+narrowSchedule.addEventListener('change', () => {
+  if (db.logged && !isTeacher() && page === 'schedule' && !scheduleView) render();
+});
+
+function resetScheduleFilters() {
+  scheduleGroup = scheduleDay = '';
+}
+
+function changeScheduleFilter(control) {
+  if (control.id === 'scheduleGroupFilter') scheduleGroup = control.value;
+  else scheduleDay = control.value;
+  render();
+  document.getElementById(control.id)?.focus({ preventScroll: true });
+}
+
+function setScheduleView(view) {
+  scheduleView = view;
+  render();
+  document.querySelector('[data-view="' + view + '"]')?.focus({ preventScroll: true });
+}
 
 function visibleSchedule() {
   if (!isTeacher()) return db.schedule;
@@ -3525,15 +3704,23 @@ function delivery(key, sid, checked) {
 
 // الدرجات
 function grades() {
+  if (!classes().length) return title('الدرجات') + `<section class="task-panel">${emptyTask('لم تُسند إليك فصول بعد', 'تواصل مع مدير المدرسة لإسناد فصل ومادة إليك.')}</section>`;
   selectedClass = classes().includes(selectedClass) ? selectedClass : classes()[0];
   const classSubjects = (teacherAssignment()?.assignments || [])
     .filter((a) => a.group === selectedClass)
     .map((a) => a.subject);
   gradeSubject = classSubjects.includes(gradeSubject) ? gradeSubject : classSubjects[0];
   let list = db.students.filter((x) => x.group === selectedClass);
-  return `${title('الدرجات', 'رصد درجات الطلاب')}<div class="toolbar"><select onchange="selectedClass=this.value;render()">${options(classes(), selectedClass)}</select><select onchange="gradeSubject=this.value;render()">${options(classSubjects, gradeSubject)}</select></div><div class="card list-card">${list.map((x) => row(x.name, x.group, `<input type="number" min="0" max="100" placeholder="من ١٠٠" aria-label="درجة ${esc(x.name)}" style="width:100px" value="${esc(db.grades[gradeSubject + '|' + x.id] ?? '')}" onchange="setGrade('${x.id}',this)">`)).join('') || '<div class="empty">لا يوجد طلاب في هذا الفصل</div>'}</div><div style="margin-top:16px"><button class="btn" onclick="save()">حفظ الدرجات</button></div>`;
+  return `${title('الدرجات', 'رصد درجات الطلاب')}<div class="toolbar"><label>الفصل<select onchange="selectedClass=this.value;render()">${options(classes(), selectedClass)}</select></label><label>المادة<select onchange="gradeSubject=this.value;render()">${options(classSubjects, gradeSubject)}</select></label></div><div class="card list-card">${list.map((x) => row(x.name, x.group, `<input class="grade-entry" type="number" min="0" max="100" step="any" placeholder="من ١٠٠" aria-label="درجة ${esc(x.name)}" style="width:100px" value="${esc(db.grades[gradeSubject + '|' + x.id] ?? '')}" onchange="setGrade('${x.id}',this)">`)).join('') || '<div class="empty">لا يوجد طلاب في هذا الفصل</div>'}</div><div style="margin-top:16px"><button class="btn" onclick="saveGrades()" ${list.length ? '' : 'disabled'}>حفظ الدرجات</button></div>`;
+}
+function saveGrades() {
+  const invalid = $('.grade-entry:invalid');
+  if (invalid) return invalid.reportValidity();
+  save(null, () => toast('تم حفظ الدرجات'));
 }
 function setGrade(key, el) {
+  el.setCustomValidity('');
+  if (el.validity.badInput) return;
   if (el.value === '') {
     delete db.grades[gradeSubject + '|' + key];
     return;
@@ -3544,7 +3731,6 @@ function setGrade(key, el) {
     el.reportValidity();
     return;
   }
-  el.setCustomValidity('');
   db.grades[gradeSubject + '|' + key] = n;
 }
 
@@ -3911,17 +4097,70 @@ function timetableLegendHTML(lessons) {
   return `<h3 class="teacher-key-title">دليل المدرسين <small>الرقم داخل الحصة يشير إلى المدرس</small></h3><div class="teacher-key">${codes.map((name,i)=>used.has(name)?`<div class="teacher-key-item"><b>${num(i+1)}</b><span>${esc(name)}</span></div>`:'').join('')}</div><p class="schedule-note">— حصة غير مسجلة · عربي: اللغة العربية · إنجليزي: اللغة الإنجليزية · إسلامية / فنية / رياضة: مواد التربية</p>`;
 }
 
-function schedule() {
-  const groups=classes();
-  if(scheduleGroup&&!groups.includes(scheduleGroup))scheduleGroup='';
-  const lessons=visibleSchedule().filter(l=>(!scheduleGroup||l.group===scheduleGroup)&&(!scheduleDay||l.day===scheduleDay));
-  const axes=timetableAxes(lessons, scheduleGroup?[scheduleGroup]:groups);
-  if(!isTeacher())return `${title(scheduleGroup?'جدول الفصل':'الجدول العام','خطة أسبوعية واضحة لكل صف وشعبة',`<div class="export-actions"><button class="btn outline" onclick="downloadManagerPage(this)">${symbol('picture_as_pdf')} تنزيل PDF</button><button class="btn" onclick="scheduleForm()">${symbol('add')} إضافة حصة</button></div>`)}<div class="schedule-toolbar"><div class="toolbar"><label>الصف والشعبة<select aria-label="الفصل" onchange="scheduleGroup=this.value;render()"><option value="">كل الفصول</option>${options(groups,scheduleGroup)}</select></label><label>اليوم<select aria-label="اليوم" onchange="scheduleDay=this.value;render()"><option value="">الأسبوع كاملًا</option>${options(axes.days,scheduleDay)}</select></label></div><div class="schedule-summary"><span>${num(lessons.length)} حصة</span><span>${num(axes.groups.length)} شعبة</span><span>${esc(db.year)}</span></div></div><section class="schedule-board"><div class="schedule-board-head"><div><h2>جدول الدروس الأسبوعي</h2><p>${esc(db.school)} · العام الدراسي ${esc(db.year)}</p></div><span class="schedule-label">المادة + رقم المدرس</span></div><p class="schedule-hint">اسحب أفقيًا لعرض الفصول، واضغط على الحصة لتعديلها.</p><div class="schedule-matrix-wrap" role="region" aria-label="الجدول العام، قابل للتمرير أفقياً" tabindex="0">${timetableHTML(lessons,axes.groups,scheduleDay?[scheduleDay]:axes.days,axes.periods,true,false)}</div>${timetableLegendHTML(lessons)}</section>`;
-  const daily=axes.days.filter(day=>!scheduleDay||day===scheduleDay).map(day=>{
-    const list=lessons.filter(l=>l.day===day).sort((a,b)=>axes.periods.indexOf(a.period)-axes.periods.indexOf(b.period));
-    return list.length?`<section class="card schedule-day"><div class="card-head"><h2>${esc(day)}</h2><span class="badge">${num(list.length)} حصص</span></div>${list.map(l=>`<div class="schedule-lesson"><span class="schedule-period">${esc(l.period)}</span><div class="schedule-details"><strong>${esc(l.subject)}</strong><small>${esc(l.group)} · ${esc(l.teacher)}</small></div></div>`).join('')}</section>`:'';
+function scheduleLessonRows(lessons, editable = false) {
+  const periods = timetableAxes(lessons).periods;
+  return [...lessons].sort((a, b) => periods.indexOf(a.period) - periods.indexOf(b.period)).map(lesson => {
+    const text = `<span class="schedule-period">${esc(lesson.period)}</span><span class="schedule-details"><strong>${esc(lesson.subject)}</strong><small>${esc(lesson.group)}${editable ? ' · ' + esc(lesson.teacher) : ''}</small></span>`;
+    return editable
+      ? `<button class="schedule-lesson schedule-edit" data-lesson="${esc(lesson.id)}" onclick="scheduleForm(this.dataset.lesson)">${text}${symbol('chevron_left')}</button>`
+      : `<div class="schedule-lesson">${text}</div>`;
   }).join('');
-  return `${title('الجدول الأسبوعي',`${num(lessons.length)} حصة مسندة إليك`)}<div class="toolbar schedule-filters"><label>الفصل<select aria-label="الفصل" onchange="scheduleGroup=this.value;render()"><option value="">كل فصولي</option>${options(groups,scheduleGroup)}</select></label><label>اليوم<select aria-label="اليوم" onchange="scheduleDay=this.value;render()"><option value="">كل الأيام</option>${options(axes.days,scheduleDay)}</select></label></div><div class="schedule-days">${daily||'<div class="card empty">لا توجد حصص في هذا الاختيار</div>'}</div>`;
+}
+
+function schedule() {
+  const groups = classes();
+  if (scheduleGroup && !groups.includes(scheduleGroup)) scheduleGroup = '';
+  const allLessons = visibleSchedule();
+  const lessons = allLessons.filter(lesson =>
+    (!scheduleGroup || lesson.group === scheduleGroup) && (!scheduleDay || lesson.day === scheduleDay)
+  );
+  const axes = timetableAxes(allLessons, scheduleGroup ? [scheduleGroup] : groups);
+  const days = scheduleDay ? [scheduleDay] : axes.days;
+  const teacher = isTeacher();
+  const filters = `<div class="schedule-filters"><label>الصف والشعبة<select id="scheduleGroupFilter" onchange="changeScheduleFilter(this)"><option value="">${teacher ? 'كل فصولي' : 'كل الفصول'}</option>${options(groups, scheduleGroup)}</select></label>
+    <label>اليوم<select id="scheduleDayFilter" onchange="changeScheduleFilter(this)"><option value="">كل الأيام</option>${options(axes.days, scheduleDay)}</select></label></div>`;
+  const daily = () => `<div class="schedule-days">${days.map(day => {
+    const entries = lessons.filter(lesson => lesson.day === day);
+    return entries.length ? `<section class="task-panel schedule-day"><div class="task-heading"><h2>${esc(day)}</h2><span>${num(entries.length)} حصة</span></div>${scheduleLessonRows(entries, !teacher)}</section>` : '';
+  }).join('')}</div>`;
+  const filteredEmpty = emptyTask('لا توجد حصص تطابق هذا الاختيار', '', 'عرض كل الحصص', 'resetScheduleFilters();render()');
+  if (teacher) {
+    return title('الجدول') + (allLessons.length
+      ? filters + (lessons.length ? daily() : `<section class="task-panel">${filteredEmpty}</section>`)
+      : `<section class="task-panel">${emptyTask('لا توجد حصص مسندة إليك', 'تظهر الحصص هنا بعد إضافتها إلى جدول المدرسة.')}</section>`);
+  }
+
+  const prerequisite = schoolSetupSteps(scheduleGroup).slice(0, 4).find(step => !step.done);
+  let add = '';
+  if (!prerequisite) {
+    add = `<button class="btn" onclick="scheduleForm()">${symbol('add')} إضافة حصة</button>`;
+  } else if (scheduleGroup) {
+    add = `<button class="btn outline" onclick="${prerequisite.action}">${prerequisite.label} لهذا الفصل</button>`;
+  }
+  const exportButton = '<button class="btn outline" onclick="downloadManagerPage(this)">' + symbol('picture_as_pdf') + ' تنزيل PDF</button>';
+  if (!allLessons.length) {
+    const messages = {
+      'إضافة فصل': ['أضف فصلاً لبدء الجدول', 'تظهر الحصص في الجدول بعد إضافة الفصول والمواد وتكليف المدرسين.'],
+      'إضافة مادة': ['أضف مادة للجدول', 'تحتاج إلى مادة لإسنادها إلى المدرس.'],
+      'إنشاء حساب مدرس': ['أنشئ حساب مدرس لإضافة الحصص', 'ستتمكن بعدها من إسناد فصل ومادة إليه.'],
+      'إسناد فصل ومادة': ['أسند فصلاً ومادة قبل إضافة حصة', 'اختر المدرس وأضف التكليف من ملفه.'],
+    };
+    const empty = prerequisite
+      ? emptyTask(...messages[prerequisite.title], prerequisite.label, prerequisite.action)
+      : emptyTask('لا توجد حصص في الجدول بعد', 'اختر اليوم والفصل والمدرس لإضافة أول حصة.', 'إضافة أول حصة', 'scheduleForm()');
+    return title('الجدول العام') + `<section class="task-panel">${empty}</section>`;
+  }
+
+  const currentView = scheduleView || (narrowSchedule.matches ? 'daily' : 'weekly');
+  const choices = `<div class="schedule-views" role="group" aria-label="طريقة عرض الجدول">${[['daily','قائمة يومية'],['weekly','جدول أسبوعي']].map(([key, label]) =>
+    `<button class="btn outline" type="button" data-view="${key}" aria-pressed="${currentView === key}" onclick="setScheduleView('${key}')">${label}</button>`
+  ).join('')}</div>`;
+  const board = currentView === 'daily' ? daily() : `<section class="schedule-board"><div class="schedule-board-head"><h2>جدول الدروس الأسبوعي</h2></div>
+    <div class="schedule-matrix-wrap" role="region" aria-label="الجدول العام، قابل للتمرير أفقياً" tabindex="0">${timetableHTML(lessons, axes.groups, days, axes.periods, true, false)}</div>
+    ${timetableLegendHTML(lessons)}</section>`;
+  const heading = title('الجدول العام', '', `<div class="export-actions">${add}${lessons.length ? exportButton : ''}</div>`);
+  const content = lessons.length ? board : `<section class="task-panel">${filteredEmpty}</section>`;
+  return heading + `<section class="task-panel schedule-controls">${filters}${choices}</section>` + content;
 }
 function exportActions(mode='native') {
   const action=mode==='manager'?'downloadManagerPage':'downloadNativePage';

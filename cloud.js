@@ -16,6 +16,9 @@ async function restoreSession() {
     if (generation !== cloud.generation) return;
     cloud.token = token;
     installSchool(result);
+    const requestedPage = location.hash.slice(1);
+    page = allowedPage(requestedPage);
+    if (requestedPage && requestedPage !== page) history.replaceState(null, '', '#home');
     render();
   } catch (error) {
     if (generation !== cloud.generation) return;
@@ -74,8 +77,19 @@ function snapshotVersion(data) {
 }
 function syncStatus() {
   const status = $('#syncStatus');
-  if (status) status.textContent = cloud.failed ? cloud.failed.message : cloud.sending || cloud.pending.length ? 'جارٍ الحفظ…' : 'متصل';
-  if ($('#syncRecovery')) $('#syncRecovery').hidden = !cloud.failed;
+  const failure = cloud.failed;
+  if (status) status.textContent = failure ? 'لم يُحفظ' : cloud.sending || cloud.pending.length ? 'جارٍ الحفظ…' : 'متصل';
+  const recovery = $('#syncRecovery');
+  if (!recovery) return;
+  recovery.hidden = !failure;
+  if (!failure) return;
+  const retryable = !failure.status || failure.status >= 500;
+  $('#syncMessage').textContent = retryable
+    ? 'تعذر الاتصال بالخادم. تعديلاتك موجودة في هذه الصفحة ويمكنك إعادة محاولة حفظها.'
+    : failure.status === 409
+      ? 'تغيّرت بيانات المدرسة على جهاز آخر. حدّث البيانات قبل إعادة إدخال تعديلك.'
+      : failure.message;
+  $('#syncAction').textContent = retryable ? 'إعادة محاولة الحفظ' : 'تحديث البيانات';
 }
 function save(credential, success) {
   if (!cloud.token) return false;
